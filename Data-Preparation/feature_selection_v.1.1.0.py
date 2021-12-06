@@ -25,6 +25,8 @@ def feature_selection(df: 'DataFrame') -> ('np.array(data)', '[column_names]' ):
     df_arr = np.delete(df_arr, np.s_[8], axis=1)    
     
     df_arr = np.array([row  for row in df_arr if ' ?' not in row])
+
+    df_new = np.delete(df_arr, np.s_[8], axis=1)   
     df_arr = np.c_[df_new, [0 if " <=50K" else 1  for value in df_arr.T[8]]]
 
     return pd.DataFrame(data=df_arr, index= df_arr, columns=['age', 'workclass', 'education-num','occupation',  'sex',
