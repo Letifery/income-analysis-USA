@@ -2,10 +2,26 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-df = pd.read_csv("https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data", names=["age","workclass","fnlwgt","education",
-		"education_num","marital-status","occupation","relationship","race","sex","capital-gains","capital-loss","hours-per-week","native-country","income"])
-
 def multi_occ_plot(df, typemask:[int]):
+		'''
+		Plots the occurences of a column in a dataframe, whilst the type of plot depends
+		on the values in the typemask array.
+		
+		Parameters
+		------------
+		df			: A dataframe with a header row
+		typemask	: An array of length k = |header|, where the elements have to be in range [0,3].
+					The respective number specifies what plotting method will be used for that column;
+					0 - Skips column/No plot
+					1 - Barplot
+					2 - Lineplot
+					3 - Boxplot
+		
+		Returns
+		------------
+		Nothing
+		'''
+
 	for i,x in enumerate(df.columns.values.tolist()):
 		match typemask[i]:
 			case 1:
