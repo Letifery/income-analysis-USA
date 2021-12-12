@@ -171,3 +171,117 @@ class ModelAlteration():
                 epoch += 1
         if plot: self.plot_accuracy(fold_acc, "Used learning_rate", list(map(lambda x: "penalty: " + str(x), penalty)), list(learning_rate))
         return(best_model)
+
+
+    def optimize_decision_tree(self, 
+        df, 
+        target:int,
+        criterion = ["gini", "entropy"], 
+        max_depth:[int]= np.linspace(1, 10, num=10),
+        splitter = ["best", "random"],
+        folds:int = 10,
+        plot:bool=True):
+        '''
+        Attempts to find the most optimal model parameters for the decision tree 
+        classifier by finding the best fold for each permutation of the 
+        parameters. The best fold is determined by strat_kfold_evaluation(). 
+        The accuracy of all best folds is then compared and the parameters of 
+        the best fold are returned (in addition to the fold itself)
+        Parameters
+        ------------
+        df : dataframe
+            Your datatable
+        target : int 
+            The index of your target column
+        criterion : [String]
+            A list containing "gini" and "entropy"
+        max_depth : [int] 
+            A list containing the number of max_depth the algorithm should
+            try out
+        splitter : [String] 
+            A list containing "best" and "random"
+        folds : int 
+            How often your dataframe should be split in strat_kfold_evaluation
+        plot : bool
+            Plots the accuracies over each fold
+        Returns
+        ------------
+        best_fold: (np.array(int), np.array(int))
+            An indexlist of the fold which has performed best overall
+        l : float
+            The best learning rate for this dataset+penalty 
+        r : int 
+            Best penalty   
+        '''
+        best_acc, best_model, fold_acc = 0, 0, [[[None for _ in max_depth] for _ in splitter] for _ in criterion]
+        epoch, end = 1, len(criterion)*len(splitter)*len(max_depth)
+
+        for i, cri in enumerate(criterion):
+            for j, split in enumerate(splitter):
+                for k, max_d in enumerate(max_depth):
+                    model = DecisionTreeClassifier(criterion = cri, splitter = split, max_depth = max_d)
+                    fold_acc[i][j][k], tmp_fold = (lambda x: [max(x[0]), x[1]])(self.strat_kfold_evaluation(df, model, target, folds))
+                    if fold_acc[i][j][k] > best_acc: 
+                        best_acc = fold_acc[i][j][k]
+                        best_model = (tmp_fold, cri, split, max_d)
+                    print("Epoch %s/%s | criterion = %s, splitter = %s, max_depth = %s, Accuracy = %s" % (epoch, end, cri, split, max_d, fold_acc[i][j][k]))
+                    epoch += 1
+       # print()
+        for i in range(len(fold_acc)):
+            if plot: self.plot_accuracy(fold_acc[i], "Used criterion", list(map(lambda x: "max_depth: " + str(x), criterion)), list(max_depth))
+
+        return(best_model)
+
+
+    def optimize_NB(self, 
+        df, 
+        target:int,
+        binarize:[float]= np.linspace(0, 100, num=101).astype(float),
+        fit_prior:[bool] = [True, False], 
+        folds:int = 10,
+        plot:bool=True):
+        '''
+        Attempts to find the most optimal model parameters for the optimize_NB 
+        classifier by finding the best fold for each permutation of the 
+        parameters. The best fold is determined by strat_kfold_evaluation(). 
+        The accuracy of all best folds is then compared and the parameters of 
+        the best fold are returned (in addition to the fold itself)
+        Parameters
+        ------------
+        df : dataframe
+            Your datatable
+        target : int 
+            The index of your target column
+        fit_prior : [bool]
+            A list of True and False
+        binarize : [int] 
+            A list containing the number of fit_priors the algorithm should
+            try out
+        folds : int 
+            How often your dataframe should be split in strat_kfold_evaluation
+        plot : bool
+            Plots the accuracies over each fold
+        Returns
+        ------------
+        best_fold: (np.array(int), np.array(int))
+            An indexlist of the fold which has performed best overall
+        l : float
+            The best learning rate for this dataset+penalty 
+        r : int 
+            Best penalty   
+        '''
+
+        best_acc, best_model, fold_acc = 0, 0, [[None for _ in binarize ] for _ in fit_prior]
+        epoch, end = 1, len(binarize)*len(fit_prior)
+
+        for i, fit_p in enumerate(fit_prior):
+            for j, binar in enumerate(binarize):
+                model = BernoulliNB(binarize = binar, fit_prior = fit_p)
+                fold_acc[i][j], tmp_fold = (lambda x: [max(x[0]), x[1]])(self.strat_kfold_evaluation(df, model, target, folds))
+                if fold_acc[i][j] > best_acc: 
+                    best_acc = fold_acc[i][j]
+                    best_model = (tmp_fold, binar, fit_p)
+                print("Epoch %s/%s | fit_prior = %s, binarize = %s, Accuracy = %s" % (epoch, end, fit_p, binar, fold_acc[i][j]))
+                epoch += 1
+        if plot: self.plot_accuracy(fold_acc, "Used alpha",  list(map(lambda x: "fit_prior: " + str(x), fit_prior)), list(binarize))
+        return(best_model)
