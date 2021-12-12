@@ -1,10 +1,11 @@
 class data_visualization():
-    def __init__(self, features, target):
-        self.features = features
-        self.target = target.astype(int)
+    def __init__(self, df, target):
+        self.features = df.loc[:, df.columns!=target].values
+        self.target =  df[target].values.astype(int)
 
     def dimension_reduction_to_2D(self):
         fa = FactorAnalysis(n_components = 2).fit_transform(self.features)
+        print(fa)
         return fa 
 
     def dim_re_to_2D_visualization(self):
@@ -23,9 +24,6 @@ class data_visualization():
         plt.show()
     
     def plot_decision_boundary2D(self,model):
-        """
-        https://scikit-learn.org/stable/auto_examples/tree/plot_iris_dtc.html
-        """
         X = self.dimension_reduction_to_2D()
         y = np.array(self.target).flatten()
 
@@ -57,19 +55,4 @@ class data_visualization():
         plt.ylabel("Feature-2",fontsize=15)
         plt.xticks(fontsize=14)
         plt.yticks(fontsize=14)
-        return plt
-        
-# from sklearn.tree import DecisionTreeClassifier
-# df = pd.read_csv("https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data", sep=',', header=None)
-# df = df.set_axis(['age', 'workclass','fnlwgt', 'education','education-num', 'marital-status','occupation', 'relationship',
-#                    'race', 'sex','capital-gain', 'capital-loss','hours-per-week', 'native-country','income'], axis=1, inplace=False)
-
-# data_factor = np.array(feature_selection(df, True))
-
-# X = data_factor[:, :7]
-# Y = data_factor[:,7]
-
-# DV = data_visualization(X, Y)
-# DV.dim_re_to_2D_visualization()
-# modle = DecisionTreeClassifier()
-# DV.plot_decision_boundary2D(modle)
+        plt.show()

@@ -4,6 +4,9 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import StratifiedKFold
 from sklearn.linear_model import Perceptron
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.naive_bayes import GaussianNB
 
 class ModelAlteration():
     def strat_kfold_evaluation(
@@ -172,6 +175,66 @@ class ModelAlteration():
         if plot: self.plot_accuracy(fold_acc, "Used learning_rate", list(map(lambda x: "penalty: " + str(x), penalty)), list(learning_rate))
         return(best_model)
 
+	def optimize_SVM(self, 
+        df, 
+        target:int,
+        regularization:[float] = np.linspace(1, 10, num=10), 
+        kernel:[int]=[1,2,3],
+        folds:int = 10,
+        plot:bool=True):
+        '''
+        Attempts to find the most optimal model parameters for the SVM
+        classifier by finding the best fold for each permutation of the 
+        parameters. The best fold is determined by strat_kfold_evaluation(). 
+        The accuracy of all best folds is then compared and the parameters of 
+        the best fold are returned (in addition to the fold itself)
+
+        Parameters
+        ------------
+        df : dataframe
+            Your datatable
+        target : int 
+            The index of your target column
+        regularization: [float]
+            A list containing all penalties which should be tried out on the 
+            respective kernel function
+        kernel : [int] 
+            Which kernel functions should be used (refers to sklearn.svm.SVC)
+            0 - Linear          (Takes a long time without dimension reduction)
+            1 - Poly
+            2 - rbf
+            3 - sigmoid
+            4 - precomputed     (Look at Sklearns documentary first if you want to use it)
+        folds : int 
+            How often your dataframe should be split in strat_kfold_evaluation
+        plot : bool
+            Plots the accuracies over each fold if True
+
+        Returns
+        ------------
+        best_fold: (np.array(int), np.array(int))
+            An indexlist of the fold which has performed best overall
+        reg : float
+            The best penalty for this dataset and kernel 
+        kern : int 
+            Best performing kernel
+        '''
+        best_acc, best_model, fold_acc = 0, 0, [[None for _ in regularization] for _ in kernel]
+        epoch, end = 1, len(regularization)*len(kernel)
+        kernel = list(map((lambda x, d={0:"linear", 1:"poly", 2:"rbf", 3:"sigmoid"}: d[x]), kernel)) 
+
+        for i, kern in enumerate(kernel):
+            for j, reg in enumerate(regularization):
+                model = SVC(C=reg, kernel=kern)
+                fold_acc[i][j], tmp_fold = (lambda x: [max(x[0]), x[1]])(self.strat_kfold_evaluation(df, model, target, folds))
+                if fold_acc[i][j] > best_acc: 
+                    best_acc = fold_acc[i][j]
+                    best_model = (tmp_fold, reg, kern)
+                print("Epoch %s/%s | regularization = %s, kernel = %s, Accuracy = %s" % (epoch, end, kern, reg, fold_acc[i][j]))
+                epoch += 1
+        if plot: self.plot_accuracy(fold_acc, "Used regularization", list(map(lambda x: "kernel: " + str(x), kernel)), list(regularization))
+        return(best_model)
+
 
     def optimize_decision_tree(self, 
         df, 
@@ -226,7 +289,6 @@ class ModelAlteration():
                         best_model = (tmp_fold, cri, split, max_d)
                     print("Epoch %s/%s | criterion = %s, splitter = %s, max_depth = %s, Accuracy = %s" % (epoch, end, cri, split, max_d, fold_acc[i][j][k]))
                     epoch += 1
-       # print()
         for i in range(len(fold_acc)):
             if plot: self.plot_accuracy(fold_acc[i], "Used criterion", list(map(lambda x: "max_depth: " + str(x), criterion)), list(max_depth))
 

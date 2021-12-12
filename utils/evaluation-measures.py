@@ -2,29 +2,33 @@ class Evaluation_of_Classifier():
     '''
         Attributes:
         y (np.array())              : This is where we store the y_test data
-
         y_predicted (np.array())    : This is where we store the predicted lables from the modle
-
         clf (object)                : This is where we store the modle
-
         X (np.array())              : This is where we store the X_test data
     '''
-    def __init__ (self, y, y_predicted, clf, X):
-        self.y = y
-        self.y_predicted = y_predicted
-        self.class_lables = np.unique(y)
-        self.clf = clf
-        self.X = X   
+    def __init__ (self, df, indexdf, target, model):
+        self.clf, self.y, self.y_predicted, self.X = self.calculate_model(df, indexdf, target, model)
+        self.class_labels = np.unique(self.y)
+
+    def calculate_model(self, df, indexdf, target, model):
+        data, target = df.loc[:, df.columns!=target].values, df[target].values
+        x_train, x_test = data[indexdf[0]], data[indexdf[1]]
+        y_train, y_test = target[indexdf[0]], target[indexdf[1]]
+
+        model = model.fit(x_train, y_train)
+        y_pred = model.predict(x_test)
+
+        return(model, y_test, y_pred, x_test)
 
     def evaluate(self):
         '''
             Evaluates the modle via confusion matrix (+ accuracy, error_rate, sensitivity, 
                                                             specificity, precision, F1 and ROC curve)
         '''
-        confusion_matrix    = self.multi_class_confusion_matrix() 
+        confusion_matrix = self.multi_class_confusion_matrix() 
         accuracy, error_rate, sensitivity, specificity, precision, F1 = np.array([]), np.array([]), np.array([]), np.array([]), np.array([]), np.array([])
         
-        for i in range(len(self.class_lables)):
+        for i in range(len(self.class_labels)):
             TP = confusion_matrix[i,i]
             FP = np.sum(confusion_matrix[:, i]) - TP
             FN = np.sum(confusion_matrix[i, :]) - TP
@@ -60,13 +64,12 @@ class Evaluation_of_Classifier():
     def multi_class_confusion_matrix(self):
         '''
             Calculats the confusion matrix
-
             Returns:
                 confusion_matrix (np.array()) : Is the confusion matrix in the right shape
         '''
         confusion_matrix = np.array([])
-        for alable in self.class_lables:
-            for plable in self.class_lables:
+        for alable in self.class_labels:
+            for plable in self.class_labels:
                 
                 if alable == plable: 
                     confusion_matrix = np.append(confusion_matrix, np.sum([alable == yt == pred_y 
@@ -74,7 +77,7 @@ class Evaluation_of_Classifier():
                 else: 
                     confusion_matrix = np.append(confusion_matrix, np.sum([alable == yt and plable == pred_y 
                                                                            for yt, pred_y in zip(self.y, self.y_predicted)]))
-        return confusion_matrix.reshape(len(self.class_lables), len(self.class_lables))
+        return confusion_matrix.reshape(len(self.class_labels), len(self.class_labels))
 
     def Roc(self):
         '''
@@ -96,19 +99,3 @@ class Evaluation_of_Classifier():
         plt.ylabel('True Positive Rate')
         plt.xlabel('False Positive Rate')
         plt.show()
-
-
-# Example:
-# import numpy as np
-# import pandas as pd
-# import matplotlib.pyplot as plt
-# from sklearn.tree import DecisionTreeClassifier
-# from sklearn.metrics import roc_auc_score
-# import sklearn.metrics as metrics
-
-# DT_model = DecisionTreeClassifier()
-# DT_model = DT_model.fit(X_train,y_train)
-# y_pred = DT_model.predict(X_test)
-
-# Evaluation = Evaluation_of_Classifier(y_test, y_pred, DT_model, X_test)
-# Evaluation.evaluate()
