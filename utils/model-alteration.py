@@ -6,7 +6,7 @@ from sklearn.linear_model import Perceptron
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.naive_bayes import GaussianNB
+from sklearn.naive_bayes import ComplementNB
 
 class ModelAlteration():
     def strat_kfold_evaluation(
@@ -34,7 +34,7 @@ class ModelAlteration():
 		------------
 		accuracy	: A list which contains the accuracy of the model over each folds
 		best_fold	: The fold with the highest accuracy with the used model
-		'''
+	'''
 	
         data, target = df.loc[:, df.columns!=target].values, df[target].values      
         skf = StratifiedKFold(n_splits=folds, shuffle=shuffle, random_state=random_state)
@@ -49,7 +49,6 @@ class ModelAlteration():
         return(accuracy, best_fold)
 
     def plot_accuracy(self, acc:[[float]], xlab:str, legend:[str], xaxis:[]=[]):
-        print(legend, xaxis)
         plt.xlabel(xlab)
         plt.ylabel('Accuracy [%]')
         acc = acc if len(acc)>0 else [acc]
@@ -60,6 +59,7 @@ class ModelAlteration():
             for i, accuracy in enumerate(acc):
                 plt.plot(xaxis, accuracy, label = legend[i])  
         plt.legend(loc="upper left")
+        plt.show()
 
     def optimize_knn(self, 
         df, 
@@ -74,7 +74,6 @@ class ModelAlteration():
         of the parameters. The best fold is determined by strat_kfold_evaluation(). 
         The accuracy of all best folds is then compared and the  parameters of 
         the best fold are returned (in addition to the fold itself)
-
         Parameters
         ------------
         df : dataframe
@@ -92,15 +91,11 @@ class ModelAlteration():
             How often your dataframe should be split in strat_kfold_evaluation
         plot : bool
             Plots the accuracies over each fold
-
         Returns
         ------------
-        best_fold: (np.array(int), np.array(int))
+        best_fold: (np.array(int), {model_parameters})
             An indexlist of the fold which has performed best overall
-        k : int
-            The number of neighbours where the model has performed best 
-        used_metric : int 
-            The metric used where the model performed best
+            And a dict with the model parameters for the best fold 
         '''
         best_acc, best_model, fold_acc = 0, 0, [[None for _ in neighbours] for _ in metric]
         epoch, end = 1, len(neighbours)*len(metric)
@@ -110,7 +105,7 @@ class ModelAlteration():
                 fold_acc[i][j], tmp_fold = (lambda x: [max(x[0]), x[1]])(self.strat_kfold_evaluation(df, model, target, folds))
                 if fold_acc[i][j] > best_acc: 
                     best_acc = fold_acc[i][j]
-                    best_model = (tmp_fold, k, m)
+                    best_model = (tmp_fold, {"n_neighbors" : k, "p" : m})
                 print("Epoch %s/%s | neighbours=%s, metric=%s, Accuracy=%s" % (epoch, end, k, m, fold_acc[i][j]))
                 epoch += 1
         if plot: self.plot_accuracy(fold_acc, "Number of neighbours", list(map(lambda x: "Metric " + x, list(map(str, metric)))), neighbours)
@@ -129,7 +124,6 @@ class ModelAlteration():
         parameters. The best fold is determined by strat_kfold_evaluation(). 
         The accuracy of all best folds is then compared and the parameters of 
         the best fold are returned (in addition to the fold itself)
-
         Parameters
         ------------
         df : dataframe
@@ -149,15 +143,11 @@ class ModelAlteration():
             How often your dataframe should be split in strat_kfold_evaluation
         plot : bool
             Plots the accuracies over each fold
-
         Returns
         ------------
-        best_fold: (np.array(int), np.array(int))
+        best_fold: (np.array(int), {model_parameters})
             An indexlist of the fold which has performed best overall
-        l : float
-            The best learning rate for this dataset+penalty 
-        r : int 
-            Best penalty   
+            And a dict with the model parameters for the best fold 
         '''
         best_acc, best_model, fold_acc = 0, 0, [[None for _ in learning_rate] for _ in penalty]
         epoch, end = 1, len(learning_rate)*len(penalty)
@@ -169,13 +159,13 @@ class ModelAlteration():
                 fold_acc[i][j], tmp_fold = (lambda x: [max(x[0]), x[1]])(self.strat_kfold_evaluation(df, model, target, folds))
                 if fold_acc[i][j] > best_acc: 
                     best_acc = fold_acc[i][j]
-                    best_model = (tmp_fold, k, m)
+                    best_model = (tmp_fold, { "eta0" : k, "penalty" : m})
                 print("Epoch %s/%s | learning_rate=%s, penalty=%s, Accuracy=%s" % (epoch, end, k, m, fold_acc[i][j]))
                 epoch += 1
         if plot: self.plot_accuracy(fold_acc, "Used learning_rate", list(map(lambda x: "penalty: " + str(x), penalty)), list(learning_rate))
         return(best_model)
 
-	def optimize_SVM(self, 
+    def optimize_SVM(self, 
         df, 
         target:int,
         regularization:[float] = np.linspace(1, 10, num=10), 
@@ -188,7 +178,6 @@ class ModelAlteration():
         parameters. The best fold is determined by strat_kfold_evaluation(). 
         The accuracy of all best folds is then compared and the parameters of 
         the best fold are returned (in addition to the fold itself)
-
         Parameters
         ------------
         df : dataframe
@@ -209,15 +198,11 @@ class ModelAlteration():
             How often your dataframe should be split in strat_kfold_evaluation
         plot : bool
             Plots the accuracies over each fold if True
-
         Returns
         ------------
-        best_fold: (np.array(int), np.array(int))
+        best_fold: (np.array(int), {model_parameters})
             An indexlist of the fold which has performed best overall
-        reg : float
-            The best penalty for this dataset and kernel 
-        kern : int 
-            Best performing kernel
+            And a dict with the model parameters for the best fold 
         '''
         best_acc, best_model, fold_acc = 0, 0, [[None for _ in regularization] for _ in kernel]
         epoch, end = 1, len(regularization)*len(kernel)
@@ -229,7 +214,7 @@ class ModelAlteration():
                 fold_acc[i][j], tmp_fold = (lambda x: [max(x[0]), x[1]])(self.strat_kfold_evaluation(df, model, target, folds))
                 if fold_acc[i][j] > best_acc: 
                     best_acc = fold_acc[i][j]
-                    best_model = (tmp_fold, reg, kern)
+                    best_model = (tmp_fold, {"C" :reg, "kernel" :kern})
                 print("Epoch %s/%s | regularization = %s, kernel = %s, Accuracy = %s" % (epoch, end, kern, reg, fold_acc[i][j]))
                 epoch += 1
         if plot: self.plot_accuracy(fold_acc, "Used regularization", list(map(lambda x: "kernel: " + str(x), kernel)), list(regularization))
@@ -269,12 +254,9 @@ class ModelAlteration():
             Plots the accuracies over each fold
         Returns
         ------------
-        best_fold: (np.array(int), np.array(int))
+        best_fold: (np.array(int), {model_parameters})
             An indexlist of the fold which has performed best overall
-        l : float
-            The best learning rate for this dataset+penalty 
-        r : int 
-            Best penalty   
+            And a dict with the model parameters for the best fold 
         '''
         best_acc, best_model, fold_acc = 0, 0, [[[None for _ in max_depth] for _ in splitter] for _ in criterion]
         epoch, end = 1, len(criterion)*len(splitter)*len(max_depth)
@@ -286,24 +268,23 @@ class ModelAlteration():
                     fold_acc[i][j][k], tmp_fold = (lambda x: [max(x[0]), x[1]])(self.strat_kfold_evaluation(df, model, target, folds))
                     if fold_acc[i][j][k] > best_acc: 
                         best_acc = fold_acc[i][j][k]
-                        best_model = (tmp_fold, cri, split, max_d)
+                        best_model = (tmp_fold, {"criterion": cri, "splitter": split, "max_depth": max_d})
                     print("Epoch %s/%s | criterion = %s, splitter = %s, max_depth = %s, Accuracy = %s" % (epoch, end, cri, split, max_d, fold_acc[i][j][k]))
                     epoch += 1
         for i in range(len(fold_acc)):
-            if plot: self.plot_accuracy(fold_acc[i], "Used criterion", list(map(lambda x: "max_depth: " + str(x), criterion)), list(max_depth))
-
-        return(best_model)
+            if plot: self.plot_accuracy(fold_acc[i], "Used criterion", list(map(lambda x, y : "criterion and splitter: " + str(x) + " " + str(y), criterion,splitter)), list(max_depth))
+            return(best_model)
 
 
     def optimize_NB(self, 
         df, 
         target:int,
-        binarize:[float]= np.linspace(0, 100, num=101).astype(float),
+        alpha:[float]= np.linspace(1, 10, num=10),
         fit_prior:[bool] = [True, False], 
         folds:int = 10,
         plot:bool=True):
         '''
-        Attempts to find the most optimal model parameters for the optimize_NB 
+        Attempts to find the most optimal model parameters for the NB 
         classifier by finding the best fold for each permutation of the 
         parameters. The best fold is determined by strat_kfold_evaluation(). 
         The accuracy of all best folds is then compared and the parameters of 
@@ -316,8 +297,8 @@ class ModelAlteration():
             The index of your target column
         fit_prior : [bool]
             A list of True and False
-        binarize : [int] 
-            A list containing the number of fit_priors the algorithm should
+        alpha : [int] 
+            A list containing the number of alpha, the algorithm should
             try out
         folds : int 
             How often your dataframe should be split in strat_kfold_evaluation
@@ -325,25 +306,22 @@ class ModelAlteration():
             Plots the accuracies over each fold
         Returns
         ------------
-        best_fold: (np.array(int), np.array(int))
+        best_fold: (np.array(int), {model_parameters})
             An indexlist of the fold which has performed best overall
-        l : float
-            The best learning rate for this dataset+penalty 
-        r : int 
-            Best penalty   
+            And a dict with the model parameters for the best fold 
         '''
 
-        best_acc, best_model, fold_acc = 0, 0, [[None for _ in binarize ] for _ in fit_prior]
-        epoch, end = 1, len(binarize)*len(fit_prior)
+        best_acc, best_model, fold_acc = 0, 0, [[None for _ in alpha ] for _ in fit_prior]
+        epoch, end = 1, len(alpha)*len(fit_prior)
 
         for i, fit_p in enumerate(fit_prior):
-            for j, binar in enumerate(binarize):
-                model = BernoulliNB(binarize = binar, fit_prior = fit_p)
+            for j, alp in enumerate(alpha):
+                model = ComplementNB(alpha = alp, fit_prior = fit_p)
                 fold_acc[i][j], tmp_fold = (lambda x: [max(x[0]), x[1]])(self.strat_kfold_evaluation(df, model, target, folds))
                 if fold_acc[i][j] > best_acc: 
                     best_acc = fold_acc[i][j]
-                    best_model = (tmp_fold, binar, fit_p)
-                print("Epoch %s/%s | fit_prior = %s, binarize = %s, Accuracy = %s" % (epoch, end, fit_p, binar, fold_acc[i][j]))
+                    best_model = (tmp_fold, {"alpha" : alp, "fit_prior" : fit_p})
+                print("Epoch %s/%s | fit_prior = %s, alpha = %s, Accuracy = %s" % (epoch, end, fit_p, alp, fold_acc[i][j]))
                 epoch += 1
-        if plot: self.plot_accuracy(fold_acc, "Used alpha",  list(map(lambda x: "fit_prior: " + str(x), fit_prior)), list(binarize))
+        if plot: self.plot_accuracy(fold_acc, "Used alpha",  list(map(lambda x: "fit_prior: " + str(x), fit_prior)), list(alpha))
         return(best_model)
