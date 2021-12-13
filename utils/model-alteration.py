@@ -94,8 +94,8 @@ class ModelAlteration():
         Returns
         ------------
         best_fold: (np.array(int), {model_parameters})
-            An indexlist of the fold which has performed best overall
-            And a dict with the model parameters for the best fold 
+	l 	 : An indexlist of the fold which has performed best overall
+        dic	 : And a dict with the model parameters for the best fold 
         '''
         best_acc, best_model, fold_acc = 0, 0, [[None for _ in neighbours] for _ in metric]
         epoch, end = 1, len(neighbours)*len(metric)
@@ -146,8 +146,8 @@ class ModelAlteration():
         Returns
         ------------
         best_fold: (np.array(int), {model_parameters})
-            An indexlist of the fold which has performed best overall
-            And a dict with the model parameters for the best fold 
+	l 	 : An indexlist of the fold which has performed best overall
+        dic	 : And a dict with the model parameters for the best fold 
         '''
         best_acc, best_model, fold_acc = 0, 0, [[None for _ in learning_rate] for _ in penalty]
         epoch, end = 1, len(learning_rate)*len(penalty)
@@ -201,8 +201,8 @@ class ModelAlteration():
         Returns
         ------------
         best_fold: (np.array(int), {model_parameters})
-            An indexlist of the fold which has performed best overall
-            And a dict with the model parameters for the best fold 
+	l 	 : An indexlist of the fold which has performed best overall
+        dic	 : And a dict with the model parameters for the best fold 
         '''
         best_acc, best_model, fold_acc = 0, 0, [[None for _ in regularization] for _ in kernel]
         epoch, end = 1, len(regularization)*len(kernel)
@@ -255,8 +255,8 @@ class ModelAlteration():
         Returns
         ------------
         best_fold: (np.array(int), {model_parameters})
-            An indexlist of the fold which has performed best overall
-            And a dict with the model parameters for the best fold 
+	l 	 : An indexlist of the fold which has performed best overall
+        dic	 : And a dict with the model parameters for the best fold 
         '''
         best_acc, best_model, fold_acc = 0, 0, [[[None for _ in max_depth] for _ in splitter] for _ in criterion]
         epoch, end = 1, len(criterion)*len(splitter)*len(max_depth)
@@ -307,8 +307,8 @@ class ModelAlteration():
         Returns
         ------------
         best_fold: (np.array(int), {model_parameters})
-            An indexlist of the fold which has performed best overall
-            And a dict with the model parameters for the best fold 
+	l 	 : An indexlist of the fold which has performed best overall
+        dic	 : And a dict with the model parameters for the best fold 
         '''
 
         best_acc, best_model, fold_acc = 0, 0, [[None for _ in alpha ] for _ in fit_prior]
