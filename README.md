@@ -4,20 +4,18 @@
 <!-- ABOUT THE PROJECT -->
 ## About the project
 
-A complete data analysis of census income in the US using Python
-- used Classifiers are: Desiosion Tree, Naive Bayes, kNN, Perceptron and SVM
+A complete data analysis of census income in the US using Python and several machine-learning classifiers (namely kNN, Naive-Bayes, Perceptron, Decision-Tree and SVM) to find a model which predicts if a person earns more or less than $50000 per year. 
 
-
-### Currently implemented are classes and functions for:
-- `Exploratory data analysis tools`
-- `Data preparation tools`
-- `Cross-validation for Model parameter tuning`
-- `Model evaluation tools (Confusion Matrix, ROC curve and more)`
-- `Data visualization tools (plotting of decision boundary)`
+We look at several metrics of each classifier (ROC curve, Confusion matrix, decision boundary etc.) on our specific dataset to determine the quality of a model and compare them against other models/classifiers. 
 
 ## Prerequisites
 
-- `Python ≥3.10.0`
+- `Python ≥3.6.0`
+- `Numpy`
+- `Pandas`
+- `MatPlotLib`
+- `Seaborn`
+- `Scikitlearn`
 
 <!-- LICENSE -->
 ## License
