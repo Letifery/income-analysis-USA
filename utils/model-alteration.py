@@ -272,7 +272,7 @@ class ModelAlteration():
                     print("Epoch %s/%s | criterion = %s, splitter = %s, max_depth = %s, Accuracy = %s" % (epoch, end, cri, split, max_d, fold_acc[i][j][k]))
                     epoch += 1
         for i in range(len(fold_acc)):
-            if plot: self.plot_accuracy(fold_acc[i], "Used criterion", list(map(lambda x, y : "criterion and splitter: " + str(x) + " " + str(y), criterion,splitter)), list(max_depth))
+            if plot: self.plot_accuracy(fold_acc[i], "Used max depth", list(map(lambda x, y : "criterion and splitter: " + str(x) + " " + str(y), criterion,splitter)), list(max_depth))
             return(best_model)
 
 
