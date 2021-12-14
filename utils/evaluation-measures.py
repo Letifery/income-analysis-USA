@@ -92,10 +92,9 @@ class Evaluation_of_Classifier():
         '''
         try: 
             probs = self.clf.predict_proba(self.X)
+            preds = probs[:,1]
         except AttributeError: 
-            probs = self.clf. decision_function(self.X)
-            print(probs)
-            print(np.shape(probs))
+            preds = self.clf.predict(self.X)
                   
         preds = probs[:,1]
         fpr, tpr, threshold = metrics.roc_curve(self.y, preds)
