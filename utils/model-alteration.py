@@ -273,7 +273,7 @@ class ModelAlteration():
                     epoch += 1
         for i in range(len(fold_acc)):
             if plot: self.plot_accuracy(fold_acc[i], "Used max depth", list(map(lambda x, y : "criterion and splitter: " + str(x) + " " + str(y), criterion,splitter)), list(max_depth))
-            return(best_model)
+        return(best_model)
 
 
     def optimize_NB(self, 
