@@ -95,8 +95,7 @@ class Evaluation_of_Classifier():
             preds = probs[:,1]
         except AttributeError: 
             preds = self.clf.predict(self.X)
-                  
-        preds = probs[:,1]
+
         fpr, tpr, threshold = metrics.roc_curve(self.y, preds)
 
         roc_auc_score(self.y, preds)
