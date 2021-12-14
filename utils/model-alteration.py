@@ -215,7 +215,7 @@ class ModelAlteration():
                 if fold_acc[i][j] > best_acc: 
                     best_acc = fold_acc[i][j]
                     best_model = (tmp_fold, {"C" :reg, "kernel" :kern})
-                print("Epoch %s/%s | regularization = %s, kernel = %s, Accuracy = %s" % (epoch, end, kern, reg, fold_acc[i][j]))
+                print("Epoch %s/%s | regularization = %s, kernel = %s, Accuracy = %s" % (epoch, end, reg, kern, fold_acc[i][j]))
                 epoch += 1
         if plot: self.plot_accuracy(fold_acc, "Used regularization", list(map(lambda x: "kernel: " + str(x), kernel)), list(regularization))
         return(best_model)
