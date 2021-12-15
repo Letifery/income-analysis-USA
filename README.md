@@ -8,6 +8,8 @@ A complete data analysis of census income in the US using Python and several mac
 
 We look at several metrics of each classifier (ROC curve, Confusion matrix, decision boundary etc.) on our specific dataset to determine the quality of a model and compare them against other models/classifiers. 
 
+The analyzed dataset can be found here: https://archive.ics.uci.edu/ml/datasets/adult
+
 ## Prerequisites
 
 - `Python ≥3.6.0`
