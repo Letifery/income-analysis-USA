@@ -49,6 +49,18 @@ class ModelAlteration():
         return(accuracy, best_fold)
 
     def plot_accuracy(self, acc:[[float]], xlab:str, legend:[str], xaxis:[]=[]):
+	'''
+        Plots all permutation of the parameters. 
+        ------------
+        acc         :[[float]]
+                     Contains the accuracy of all folds.
+        xlab        :String  
+                     Contains the name for the x-axis.
+        legend      :[String]
+                     Contains the values for the plot legend.
+        xaxis       :[int] or [float] 
+                     Contains values for the x-axis.
+        '''
         plt.xlabel(xlab)
         plt.ylabel('Accuracy [%]')
         acc = acc if len(acc)>0 else [acc]
