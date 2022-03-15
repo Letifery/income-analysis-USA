@@ -49,7 +49,7 @@ class ModelAlteration():
         return(accuracy, best_fold)
 
     def plot_accuracy(self, acc:[[float]], xlab:str, legend:[str], xaxis:[]=[]):
-	'''
+        '''
         Plots all permutation of the parameters. 
         ------------
         acc         :[[float]]
